@@ -23,7 +23,7 @@ GENDER = StringVar()
 AGE = StringVar()
 ADDRESS = StringVar()
 CONTACT = StringVar()
-
+S = StringVar()
 
 
 #============================METHODS=====================================
@@ -39,10 +39,7 @@ def Database():
             age INTEGER,
             address TEXT, 
             contact TEXT)''')
-    cursor.execute("INSERT INTO `member` (firstname, lastname, gender, age, address, contact) VALUES('ngo', 'quang', 'Female', 5, 'ha nam', 'd biet')")
-    cursor.execute("SELECT * FROM `member` ORDER BY `age` DESC")
-    # for i in cursor:
-    #     print(i)
+    cursor.execute("SELECT * FROM `member` ORDER BY age DESC")
     fetch = cursor.fetchall()
     for data in fetch:
         tree.insert('', 'end', values=(data))
@@ -50,7 +47,7 @@ def Database():
     conn.close()
 
 def SubmitData():
-    if FIRSTNAME.get() == "" or LASTNAME.get() == "" or GENDER.get() == "" or AGE.get() == 0 or ADDRESS.get() == "" or CONTACT.get() == "":
+    if  FIRSTNAME.get() == "" or LASTNAME.get() == "" or GENDER.get() == "" or AGE.get() == "" or ADDRESS.get() == "" or CONTACT.get() == "":
         result = tkMessageBox.showwarning('', 'Please Complete The Required Field', icon="warning")
     else:
         tree.delete(*tree.get_children())
@@ -58,7 +55,7 @@ def SubmitData():
         cursor = conn.cursor()
         cursor.execute("INSERT INTO `member` (firstname, lastname, gender, age, address, contact) VALUES(?, ?, ?, ?, ?, ?)", (str(FIRSTNAME.get()), str(LASTNAME.get()), str(GENDER.get()), int(AGE.get()), str(ADDRESS.get()), str(CONTACT.get())))
         conn.commit()
-        cursor.execute("SELECT * FROM `member` ORDER BY `age` ASC")
+        cursor.execute("SELECT Age,* FROM `member` ORDER BY 'age' DESC")
         fetch = cursor.fetchall()
         for data in fetch:
             tree.insert('', 'end', values=(data))
@@ -67,7 +64,7 @@ def SubmitData():
         FIRSTNAME.set("")
         LASTNAME.set("")
         GENDER.set("")
-        AGE.set(0)
+        AGE.set("")
         ADDRESS.set("")
         CONTACT.set("")
 
@@ -80,7 +77,7 @@ def UpdateData():
         cursor = conn.cursor()
         cursor.execute("UPDATE `member` SET `firstname` = ?, `lastname` = ?, `gender` =?, `age` = ?,  `address` = ?, `contact` = ? WHERE `mem_id` = ?", (str(FIRSTNAME.get()), str(LASTNAME.get()), str(GENDER.get()), int(AGE.get()), str(ADDRESS.get()), str(CONTACT.get()), int(mem_id)))
         conn.commit()
-        cursor.execute("SELECT * FROM `member` ORDER BY `age` ASC")
+        cursor.execute("SELECT * FROM `member` ORDER BY `lastname` ASC")
         fetch = cursor.fetchall()
         for data in fetch:
             tree.insert('', 'end', values=(data))
@@ -89,7 +86,7 @@ def UpdateData():
         FIRSTNAME.set("")
         LASTNAME.set("")
         GENDER.set("")
-        AGE.set(0)
+        AGE.set("")
         ADDRESS.set("")
         CONTACT.set("")
         
@@ -103,7 +100,7 @@ def OnSelected(event):
     FIRSTNAME.set("")
     LASTNAME.set("")
     GENDER.set("")
-    AGE.set(0)
+    AGE.set("")
     ADDRESS.set("")
     CONTACT.set("")
     FIRSTNAME.set(selecteditem[1])
@@ -250,10 +247,57 @@ def AddNewWindow():
     btn_addcon = Button(ContactForm, text="Save", width=50, command=SubmitData)
     btn_addcon.grid(row=6, columnspan=2, pady=10)
 
-
-
-
+def Ten():
+    global NewWindow
+    S.set("")
+    NewWindow = Toplevel()
+    NewWindow.title("Contact List")
+    width = 400
+    height = 200
+    screen_width = root.winfo_screenwidth()
+    screen_height = root.winfo_screenheight()
+    x = ((screen_width/2) - 455) - (width/2)
+    y = ((screen_height/2) + 20) - (height/2)
+    NewWindow.resizable(0, 0)
+    NewWindow.geometry("%dx%d+%d+%d" % (width, height, x, y))
+    if 'UpdateWindow' in globals():
+        UpdateWindow.destroy()
     
+    #===================FRAMES==============================
+    FormTitle = Frame(NewWindow)
+    FormTitle.pack(side=TOP)
+    ContactForm = Frame(NewWindow)
+    ContactForm.pack(side=TOP, pady=10)
+    
+    #===================LABELS==============================
+    lbl_title = Label(FormTitle, text="Adding New Contacts", font=('arial', 16), bg="#66ff66",  width = 300)
+    lbl_title.pack(fill=X)
+    lbl_firstname = Label(ContactForm, text="Loc theo", font=('arial', 14), bd=5)
+    lbl_firstname.grid(row=0, sticky=W)
+    
+    #===================ENTRY===============================
+    firstname = Entry(ContactForm, textvariable=S, font=('arial', 14))
+    firstname.grid(row=0, column=1)
+
+    #==================BUTTONS==============================
+    btn_addcon = Button(ContactForm, text="Loc", width=50, command=LOC)
+    btn_addcon.grid(row=6, columnspan=2, pady=10)
+def LOC():
+    if  S.get() == "":
+        result = tkMessageBox.showwarning('', 'Please Complete The Required Field', icon="warning")
+    else:
+        tree.delete(*tree.get_children())
+        conn = sqlite3.connect("pythontut.db")
+        cursor = conn.cursor()
+        conn.commit()
+        print(S.get())
+        cursor.execute("SELECT * FROM `member` WHERE `lastname`=?",[str(S.get())])
+        fetch = cursor.fetchall()
+        for data in fetch:
+            tree.insert('', 'end', values=(data))
+        cursor.close()
+        conn.close()
+        S.set("")
 #============================FRAMES======================================
 Top = Frame(root, width=500, bd=1, relief=SOLID)
 Top.pack(side=TOP)
@@ -273,11 +317,13 @@ lbl_title.pack(fill=X)
 
 #============================ENTRY=======================================
 
-#============================BUTTONS=====================================
-btn_add = Button(MidLeft, text="+ ADD NEW", bg="#66ff66", command=AddNewWindow)
+#============================BUTTONS====================================
+btn_add = Button(MidLeft, text="+ADD NEW", bg="#66ff66", command=AddNewWindow)
 btn_add.pack()
-btn_delete = Button(MidRight, text="DELETE", bg="red", command=DeleteData)
-btn_delete.pack(side=RIGHT)
+btn_add = Button(MidLeftPadding, text="     Filter     ", bg="pink", command=Ten)
+btn_add.pack()
+btn_delete = Button(MidRight, text="    DELETE   ", bg="red", command=DeleteData)
+btn_delete.pack()
 
 #============================TABLES======================================
 scrollbarx = Scrollbar(TableMargin, orient=HORIZONTAL)
@@ -295,13 +341,13 @@ tree.heading('Age', text="Age", anchor=W)
 tree.heading('Address', text="Address", anchor=W)
 tree.heading('Contact', text="Contact", anchor=W)
 tree.column('#0', stretch=NO, minwidth=0, width=0)
-tree.column('#1', stretch=NO, minwidth=1, width=80)
-tree.column('#2', stretch=NO, minwidth=1, width=80)
-tree.column('#3', stretch=NO, minwidth=1, width=120)
-tree.column('#4', stretch=NO, minwidth=1, width=90)
-tree.column('#5', stretch=NO, minwidth=1, width=80)
-tree.column('#6', stretch=NO, minwidth=1, width=120)
-tree.column('#7', stretch=NO, minwidth=1, width=120)
+tree.column('#1', stretch=NO, minwidth=0, width=0)
+tree.column('#2', stretch=NO, minwidth=0, width=80)
+tree.column('#3', stretch=NO, minwidth=0, width=120)
+tree.column('#4', stretch=NO, minwidth=0, width=90)
+tree.column('#5', stretch=NO, minwidth=0, width=80)
+tree.column('#6', stretch=NO, minwidth=0, width=120)
+tree.column('#7', stretch=NO, minwidth=0, width=120)
 tree.pack()
 tree.bind('<Double-Button-1>', OnSelected)
 
@@ -309,4 +355,3 @@ tree.bind('<Double-Button-1>', OnSelected)
 if __name__ == '__main__':
     Database()
     root.mainloop()
-    
