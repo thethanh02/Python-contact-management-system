@@ -25,7 +25,7 @@ ADDRESS = StringVar()
 CONTACT = StringVar()
 SEARCH_BY = StringVar()
 SEARCH_TEXT = StringVar()
-
+CONTAINS_FILTER = StringVar()
 
 
 #============================METHODS=====================================
@@ -269,25 +269,29 @@ def FilterWindow():
     #===================FRAMES==============================
     FormTitle = Frame(NewWindow)
     FormTitle.pack(side=TOP)
-    ContactForm = Frame(NewWindow)
-    ContactForm.pack(side=TOP, pady=8)
-    
+    FilterForm = Frame(NewWindow)
+    FilterForm.pack(side=TOP, pady=8)
+    RadioGroup = Frame(FilterForm)
+    RadioGroup.grid(row=2, column=1)
+
+    Contains = Radiobutton(RadioGroup, text="Contains", variable=CONTAINS_FILTER, value="Contains",  font=('arial', 14)).pack(side=LEFT)
+
     #===================LABELS==============================
     lbl_title = Label(FormTitle, text="Filter Window", font=('arial', 16), bg="#66ff66",  width = 300)
     lbl_title.pack(fill=X)
-    lbl_search_by = Label(ContactForm, text="Search by", font=('arial', 14), bd=5)
+    lbl_search_by = Label(FilterForm, text="Search by", font=('arial', 14), bd=5)
     lbl_search_by.grid(row=0, sticky=W)
-    
+
     #===================ENTRY===============================
-    search_by = ttk.Combobox(ContactForm, width = 20, textvariable = SEARCH_BY)
+    search_by = ttk.Combobox(FilterForm, width = 20, textvariable = SEARCH_BY)
     search_by['values'] = ("MemberID", "Firstname", "Lastname", "Gender", "Age", "Address", "Contact")
     search_by.current()
     search_by.grid(row=0, column=1)
-    search_text = Entry(ContactForm, textvariable=SEARCH_TEXT, font=('arial', 14))
+    search_text = Entry(FilterForm, textvariable=SEARCH_TEXT, font=('arial', 14))
     search_text.grid(row=1, column=1)
 
     #==================BUTTONS==============================
-    btn_addcon = Button(ContactForm, text="Search", width=50, command=Search)
+    btn_addcon = Button(FilterForm, text="Search", width=50, command=Search)
     btn_addcon.grid(row=6, columnspan=2, pady=10)
 def Search():
     if SEARCH_BY.get() == "" or SEARCH_TEXT.get() == "":
@@ -297,14 +301,15 @@ def Search():
         conn = sqlite3.connect("pythontut.db")
         cursor = conn.cursor()
         conn.commit()
-        cursor.execute("SELECT * FROM `member` WHERE " + str(SEARCH_BY.get()) + " LIKE '%" + str(SEARCH_TEXT.get()) + "%'")
+        if CONTAINS_FILTER.get() == "Contains":
+            cursor.execute("SELECT * FROM `member` WHERE " + str(SEARCH_BY.get()) + " LIKE '%" + str(SEARCH_TEXT.get()) + "%'")
+        else:
+            cursor.execute("SELECT * FROM `member` WHERE " + str(SEARCH_BY.get()) + " = ?", [str(SEARCH_TEXT.get())])
         fetch = cursor.fetchall()
         for data in fetch:
             tree.insert('', 'end', values=(data))
         cursor.close()
         conn.close()
-        SEARCH_BY.set("")
-        SEARCH_TEXT.set("")
         
 #============================FRAMES======================================
 Top = Frame(root, width=500, bd=1, relief=SOLID)
