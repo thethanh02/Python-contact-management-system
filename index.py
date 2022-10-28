@@ -25,7 +25,7 @@ ADDRESS = StringVar()
 CONTACT = StringVar()
 SEARCH_BY = StringVar()
 SEARCH_TEXT = StringVar()
-CONTAINS_FILTER = StringVar()
+CONTAINS_FILTER = IntVar()
 
 
 #============================METHODS=====================================
@@ -271,10 +271,11 @@ def FilterWindow():
     FormTitle.pack(side=TOP)
     FilterForm = Frame(NewWindow)
     FilterForm.pack(side=TOP, pady=8)
-    RadioGroup = Frame(FilterForm)
-    RadioGroup.grid(row=2, column=1)
+    CheckGroup = Frame(FilterForm)
+    CheckGroup.grid(row=2, column=1)
 
-    Contains = Radiobutton(RadioGroup, text="Contains", variable=CONTAINS_FILTER, value="Contains",  font=('arial', 14)).pack(side=LEFT)
+    Contains = Checkbutton(CheckGroup, text="Contains", variable=CONTAINS_FILTER, onvalue=1, offvalue=0, height=2, width=10)
+    Contains.pack()
 
     #===================LABELS==============================
     lbl_title = Label(FormTitle, text="Filter Window", font=('arial', 16), bg="#66ff66",  width = 300)
@@ -301,7 +302,7 @@ def Search():
         conn = sqlite3.connect("pythontut.db")
         cursor = conn.cursor()
         conn.commit()
-        if CONTAINS_FILTER.get() == "Contains":
+        if CONTAINS_FILTER.get() == 1:
             cursor.execute("SELECT * FROM `member` WHERE " + str(SEARCH_BY.get()) + " LIKE '%" + str(SEARCH_TEXT.get()) + "%'")
         else:
             cursor.execute("SELECT * FROM `member` WHERE " + str(SEARCH_BY.get()) + " = ?", [str(SEARCH_TEXT.get())])
