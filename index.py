@@ -259,11 +259,11 @@ def FilterWindow():
     SEARCH_TEXT.set("")
     NewWindow = Toplevel()
     NewWindow.title("Contact List")
-    width = 700
-    height = 500
+    width = 430
+    height = 180
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
-    x = ((screen_width/2) - 455) - (width/2)
+    x = ((screen_width/2) + 430) - (width/2)
     y = ((screen_height/2) + 20) - (height/2)
     NewWindow.resizable(0, 0)
     NewWindow.geometry("%dx%d+%d+%d" % (width, height, x, y))
@@ -271,33 +271,36 @@ def FilterWindow():
         UpdateWindow.destroy()
     
     #===================FRAMES==============================
-    FormTitle = Frame(NewWindow)
-    FormTitle.pack(side=TOP)
-    FilterForm = Frame(NewWindow)
-    FilterForm.pack(side=TOP, pady=8)
-    CheckGroup = Frame(FilterForm)
-    CheckGroup.grid(row=2, column=1)
-
-    Contains = Checkbutton(CheckGroup, text="Contains", variable=CONTAINS_FILTER, onvalue=1, offvalue=0, height=2, width=10)
+    FilterTitle = Frame(NewWindow)
+    FilterTitle.pack(side=TOP)
+    SearchByFrame = Frame(NewWindow)
+    SearchByFrame.pack(side=TOP, pady=8)
+    SearchTextFrame = Frame(NewWindow)
+    SearchTextFrame.pack(side=TOP)
+    CheckGroup = Frame(SearchTextFrame)
+    CheckGroup.grid(row=2, column=0)
+    
+    Contains = Checkbutton(CheckGroup, text="Contains", variable=CONTAINS_FILTER, onvalue=1, offvalue=0, height=2, width=10, anchor=CENTER)
     Contains.pack()
 
     #===================LABELS==============================
-    lbl_title = Label(FormTitle, text="Filter Window", font=('arial', 16), bg="#66ff66",  width = 300)
+    lbl_title = Label(FilterTitle, text="Filter Window", font=('arial', 16), bg="#66ff66",  width = 300)
     lbl_title.pack(fill=X)
-    lbl_search_by = Label(FilterForm, text="Search by", font=('arial', 14), bd=5)
-    lbl_search_by.grid(row=0, sticky=W)
+    lbl_search_by = Label(SearchByFrame, text="Search by", font=('arial', 12), bd=5)
+    lbl_search_by.grid(row=0, sticky=N)
 
     #===================ENTRY===============================
-    search_by = ttk.Combobox(FilterForm, width = 20, textvariable = SEARCH_BY)
+    search_by = ttk.Combobox(SearchByFrame, width=13, textvariable=SEARCH_BY)
     search_by['values'] = ("MemberID", "Firstname", "Lastname", "Gender", "Age", "Address", "Contact")
-    search_by.current()
-    search_by.grid(row=0, column=1)
-    search_text = Entry(FilterForm, textvariable=SEARCH_TEXT, font=('arial', 14))
-    search_text.grid(row=1, column=1)
+    search_by.current(0)
+    search_by.grid(row=0, column=1, sticky=W)
+    search_text = Entry(SearchTextFrame, textvariable=SEARCH_TEXT, width=25, font=('arial', 12))
+    search_text.grid(row=1, column=0, sticky=N)
 
     #==================BUTTONS==============================
-    btn_addcon = Button(FilterForm, text="Search", width=50, command=Search)
+    btn_addcon = Button(SearchTextFrame, text="Search", width=25, command=Search)
     btn_addcon.grid(row=6, columnspan=2, pady=10)
+    
 def Search():
     if SEARCH_BY.get() == "" or SEARCH_TEXT.get() == "":
         result = tkMessageBox.showwarning('', 'Please Complete The Required Field', icon="warning")
@@ -336,14 +339,14 @@ lbl_title.pack(fill=X)
 #============================ENTRY=======================================
 
 #============================BUTTONS====================================
-btn_home = Button(MidLeftPadding, text="     Home     ", bg="pink", command=Home)
-btn_home.pack()
-btn_add = Button(MidLeft, text="     +ADD NEW     ", bg="#66ff66", command=AddNewWindow)
-btn_add.pack()
-btn_filter = Button(MidLeftPadding, text="     Filter     ", bg="yellow", command=FilterWindow)
-btn_filter.pack()
+btn_home = Button(MidLeft, text="     Home     ", bg="pink", command=Home)
+btn_home.pack(side = LEFT)
+btn_add = Button(MidLeftPadding, text="     +ADD NEW     ", bg="#66ff66", command=AddNewWindow)
+btn_add.pack(side = RIGHT)
+btn_filter = Button(Mid, text="     FILTER     ", bg="yellow", command=FilterWindow)
+btn_filter.pack(side = LEFT)
 btn_delete = Button(MidRight, text="    DELETE   ", bg="red", command=DeleteData)
-btn_delete.pack()
+btn_delete.pack(side = RIGHT)
 
 #============================TABLES======================================
 scrollbarx = Scrollbar(TableMargin, orient=HORIZONTAL)
@@ -361,7 +364,7 @@ tree.heading('Age', text="Age", anchor=W)
 tree.heading('Address', text="Address", anchor=W)
 tree.heading('Contact', text="Contact", anchor=W)
 tree.column('#0', stretch=NO, minwidth=0, width=0)
-tree.column('#1', stretch=NO, minwidth=0, width=0)
+tree.column('#1', stretch=NO, minwidth=0, width=65, anchor=CENTER)
 tree.column('#2', stretch=NO, minwidth=0, width=80)
 tree.column('#3', stretch=NO, minwidth=0, width=120)
 tree.column('#4', stretch=NO, minwidth=0, width=90)
