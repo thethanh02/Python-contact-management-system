@@ -23,7 +23,9 @@ GENDER = StringVar()
 AGE = StringVar()
 ADDRESS = StringVar()
 CONTACT = StringVar()
-S = StringVar()
+SEARCH_BY = StringVar()
+SEARCH_TEXT = StringVar()
+
 
 
 #============================METHODS=====================================
@@ -247,13 +249,14 @@ def AddNewWindow():
     btn_addcon = Button(ContactForm, text="Save", width=50, command=SubmitData)
     btn_addcon.grid(row=6, columnspan=2, pady=10)
 
-def Ten():
+def FilterWindow():
     global NewWindow
-    S.set("")
+    SEARCH_BY.set("")
+    SEARCH_TEXT.set("")
     NewWindow = Toplevel()
     NewWindow.title("Contact List")
-    width = 400
-    height = 200
+    width = 700
+    height = 500
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
     x = ((screen_width/2) - 455) - (width/2)
@@ -267,37 +270,42 @@ def Ten():
     FormTitle = Frame(NewWindow)
     FormTitle.pack(side=TOP)
     ContactForm = Frame(NewWindow)
-    ContactForm.pack(side=TOP, pady=10)
+    ContactForm.pack(side=TOP, pady=8)
     
     #===================LABELS==============================
-    lbl_title = Label(FormTitle, text="Adding New Contacts", font=('arial', 16), bg="#66ff66",  width = 300)
+    lbl_title = Label(FormTitle, text="Filter Window", font=('arial', 16), bg="#66ff66",  width = 300)
     lbl_title.pack(fill=X)
-    lbl_firstname = Label(ContactForm, text="Loc theo", font=('arial', 14), bd=5)
-    lbl_firstname.grid(row=0, sticky=W)
+    lbl_search_by = Label(ContactForm, text="Search by", font=('arial', 14), bd=5)
+    lbl_search_by.grid(row=0, sticky=W)
     
     #===================ENTRY===============================
-    firstname = Entry(ContactForm, textvariable=S, font=('arial', 14))
-    firstname.grid(row=0, column=1)
+    search_by = ttk.Combobox(ContactForm, width = 20, textvariable = SEARCH_BY)
+    search_by['values'] = ("MemberID", "Firstname", "Lastname", "Gender", "Age", "Address", "Contact")
+    search_by.current()
+    search_by.grid(row=0, column=1)
+    search_text = Entry(ContactForm, textvariable=SEARCH_TEXT, font=('arial', 14))
+    search_text.grid(row=1, column=1)
 
     #==================BUTTONS==============================
-    btn_addcon = Button(ContactForm, text="Loc", width=50, command=LOC)
+    btn_addcon = Button(ContactForm, text="Search", width=50, command=Search)
     btn_addcon.grid(row=6, columnspan=2, pady=10)
-def LOC():
-    if  S.get() == "":
+def Search():
+    if SEARCH_BY.get() == "" or SEARCH_TEXT.get() == "":
         result = tkMessageBox.showwarning('', 'Please Complete The Required Field', icon="warning")
     else:
         tree.delete(*tree.get_children())
         conn = sqlite3.connect("pythontut.db")
         cursor = conn.cursor()
         conn.commit()
-        print(S.get())
-        cursor.execute("SELECT * FROM `member` WHERE `lastname`=?",[str(S.get())])
+        cursor.execute("SELECT * FROM `member` WHERE " + str(SEARCH_BY.get()) + " LIKE '%" + str(SEARCH_TEXT.get()) + "%'")
         fetch = cursor.fetchall()
         for data in fetch:
             tree.insert('', 'end', values=(data))
         cursor.close()
         conn.close()
-        S.set("")
+        SEARCH_BY.set("")
+        SEARCH_TEXT.set("")
+        
 #============================FRAMES======================================
 Top = Frame(root, width=500, bd=1, relief=SOLID)
 Top.pack(side=TOP)
@@ -320,7 +328,7 @@ lbl_title.pack(fill=X)
 #============================BUTTONS====================================
 btn_add = Button(MidLeft, text="+ADD NEW", bg="#66ff66", command=AddNewWindow)
 btn_add.pack()
-btn_add = Button(MidLeftPadding, text="     Filter     ", bg="pink", command=Ten)
+btn_add = Button(MidLeftPadding, text="     Filter     ", bg="pink", command=FilterWindow)
 btn_add.pack()
 btn_delete = Button(MidRight, text="    DELETE   ", bg="red", command=DeleteData)
 btn_delete.pack()

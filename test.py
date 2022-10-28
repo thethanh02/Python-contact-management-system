@@ -1,357 +1,247 @@
 from tkinter import *
-import sqlite3
-import tkinter.ttk as ttk
-import tkinter.messagebox as tkMessageBox
+from tkinter import ttk
 
-#DEVELOPED BY Mark Arvin
-root = Tk()
-root.title("Contact List")
-width = 700
-height = 400
-screen_width = root.winfo_screenwidth()
-screen_height = root.winfo_screenheight()
-x = (screen_width/2) - (width/2)
-y = (screen_height/2) - (height/2)
-root.geometry("%dx%d+%d+%d" % (width, height, x, y))
-root.resizable(0, 0)
-root.config(bg="#6666ff")
-
-#============================VARIABLES===================================
-FIRSTNAME = StringVar()
-LASTNAME = StringVar()
-GENDER = StringVar()
-AGE = StringVar()
-ADDRESS = StringVar()
-CONTACT = StringVar()
-S = StringVar()
+from sqlite3 import *
+from tkinter import messagebox
 
 
-#============================METHODS=====================================
+class Contact:
+    def __init__(self,root):
+        self.root=root
+        self.root.title("contacts Management System")
+        self.root.geometry("1400x750+10+10")
 
-def Database():
-    conn = sqlite3.connect("pythontut.db")
-    cursor = conn.cursor()
-    cursor.execute('''CREATE TABLE IF NOT EXISTS `member` 
-            (mem_id INTEGER NOT NULL  PRIMARY KEY AUTOINCREMENT, 
-            firstname TEXT, 
-            lastname TEXT, 
-            gender TEXT, 
-            age INTEGER,
-            address TEXT, 
-            contact TEXT)''')
-    cursor.execute("SELECT * FROM `member` ORDER BY age DESC")
-    fetch = cursor.fetchall()
-    for data in fetch:
-        tree.insert('', 'end', values=(data))
-    cursor.close()
-    conn.close()
+        title=Label(self.root,text="Contacts Book",bd=10,relief=GROOVE,font=("times new roman",30,"bold"),bg="green" , fg="white")
+        title.pack(side=TOP,fill=X)
+        lbl_footer = Label(self.root, text="Developed by M.Jyotsna Manasa", font=("goudy old style", 15, "bold"),
+                           bg="lightgreen", fg="black").place(x=0, y=710, relwidth=1, height=40)
 
-def SubmitData():
-    if  FIRSTNAME.get() == "" or LASTNAME.get() == "" or GENDER.get() == "" or AGE.get() == "" or ADDRESS.get() == "" or CONTACT.get() == "":
-        result = tkMessageBox.showwarning('', 'Please Complete The Required Field', icon="warning")
-    else:
-        tree.delete(*tree.get_children())
-        conn = sqlite3.connect("pythontut.db")
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO `member` (firstname, lastname, gender, age, address, contact) VALUES(?, ?, ?, ?, ?, ?)", (str(FIRSTNAME.get()), str(LASTNAME.get()), str(GENDER.get()), int(AGE.get()), str(ADDRESS.get()), str(CONTACT.get())))
-        conn.commit()
-        cursor.execute("SELECT Age,* FROM `member` ORDER BY 'age' DESC")
-        fetch = cursor.fetchall()
-        for data in fetch:
-            tree.insert('', 'end', values=(data))
-        cursor.close()
-        conn.close()
-        FIRSTNAME.set("")
-        LASTNAME.set("")
-        GENDER.set("")
-        AGE.set("")
-        ADDRESS.set("")
-        CONTACT.set("")
-
-def UpdateData():
-    if GENDER.get() == "":
-       result = tkMessageBox.showwarning('', 'Please Complete The Required Field', icon="warning")
-    else:
-        tree.delete(*tree.get_children())
-        conn = sqlite3.connect("pythontut.db")
-        cursor = conn.cursor()
-        cursor.execute("UPDATE `member` SET `firstname` = ?, `lastname` = ?, `gender` =?, `age` = ?,  `address` = ?, `contact` = ? WHERE `mem_id` = ?", (str(FIRSTNAME.get()), str(LASTNAME.get()), str(GENDER.get()), int(AGE.get()), str(ADDRESS.get()), str(CONTACT.get()), int(mem_id)))
-        conn.commit()
-        cursor.execute("SELECT * FROM `member` ORDER BY `lastname` ASC")
-        fetch = cursor.fetchall()
-        for data in fetch:
-            tree.insert('', 'end', values=(data))
-        cursor.close()
-        conn.close()
-        FIRSTNAME.set("")
-        LASTNAME.set("")
-        GENDER.set("")
-        AGE.set("")
-        ADDRESS.set("")
-        CONTACT.set("")
+        self.name_var=StringVar()
+        self.email_var=StringVar()
+        self.gender_var=StringVar()
+        self.mobileNo_var=StringVar()
+        self.teleNo_var=StringVar()
+        self.dob_var=StringVar()
+        self.address_var=StringVar()
+        self.search_by=StringVar()
+        self.search_txt=StringVar()
         
-    
-def OnSelected(event):
-    global mem_id, UpdateWindow
-    curItem = tree.focus()
-    contents =(tree.item(curItem))
-    selecteditem = contents['values']
-    mem_id = selecteditem[0]
-    FIRSTNAME.set("")
-    LASTNAME.set("")
-    GENDER.set("")
-    AGE.set("")
-    ADDRESS.set("")
-    CONTACT.set("")
-    FIRSTNAME.set(selecteditem[1])
-    LASTNAME.set(selecteditem[2])
-    AGE.set(selecteditem[4])
-    ADDRESS.set(selecteditem[5])
-    CONTACT.set(selecteditem[6])
-    UpdateWindow = Toplevel()
-    UpdateWindow.title("Contact List")
-    width = 400
-    height = 300
-    screen_width = root.winfo_screenwidth()
-    screen_height = root.winfo_screenheight()
-    x = ((screen_width/2) + 450) - (width/2)
-    y = ((screen_height/2) + 20) - (height/2)
-    UpdateWindow.resizable(0, 0)
-    UpdateWindow.geometry("%dx%d+%d+%d" % (width, height, x, y))
-    if 'NewWindow' in globals():
-        NewWindow.destroy()
-
-    #===================FRAMES==============================
-    FormTitle = Frame(UpdateWindow)
-    FormTitle.pack(side=TOP)
-    ContactForm = Frame(UpdateWindow)
-    ContactForm.pack(side=TOP, pady=10)
-    RadioGroup = Frame(ContactForm)
-    Male = Radiobutton(RadioGroup, text="Male", variable=GENDER, value="Male",  font=('arial', 14)).pack(side=LEFT)
-    Female = Radiobutton(RadioGroup, text="Female", variable=GENDER, value="Female",  font=('arial', 14)).pack(side=LEFT)
-    
-    #===================LABELS==============================
-    lbl_title = Label(FormTitle, text="Updating Contacts", font=('arial', 16), bg="orange",  width = 300)
-    lbl_title.pack(fill=X)
-    lbl_firstname = Label(ContactForm, text="Firstname", font=('arial', 14), bd=5)
-    lbl_firstname.grid(row=0, sticky=W)
-    lbl_lastname = Label(ContactForm, text="Lastname", font=('arial', 14), bd=5)
-    lbl_lastname.grid(row=1, sticky=W)
-    lbl_gender = Label(ContactForm, text="Gender", font=('arial', 14), bd=5)
-    lbl_gender.grid(row=2, sticky=W)
-    lbl_age = Label(ContactForm, text="Age", font=('arial', 14), bd=5)
-    lbl_age.grid(row=3, sticky=W)
-    lbl_address = Label(ContactForm, text="Address", font=('arial', 14), bd=5)
-    lbl_address.grid(row=4, sticky=W)
-    lbl_contact = Label(ContactForm, text="Contact", font=('arial', 14), bd=5)
-    lbl_contact.grid(row=5, sticky=W)
-
-    #===================ENTRY===============================
-    firstname = Entry(ContactForm, textvariable=FIRSTNAME, font=('arial', 14))
-    firstname.grid(row=0, column=1)
-    lastname = Entry(ContactForm, textvariable=LASTNAME, font=('arial', 14))
-    lastname.grid(row=1, column=1)
-    RadioGroup.grid(row=2, column=1)
-    age = Entry(ContactForm, textvariable=AGE,  font=('arial', 14))
-    age.grid(row=3, column=1)
-    address = Entry(ContactForm, textvariable=ADDRESS,  font=('arial', 14))
-    address.grid(row=4, column=1)
-    contact = Entry(ContactForm, textvariable=CONTACT,  font=('arial', 14))
-    contact.grid(row=5, column=1)
-    
-
-    #==================BUTTONS==============================
-    btn_updatecon = Button(ContactForm, text="Update", width=50, command=UpdateData)
-    btn_updatecon.grid(row=6, columnspan=2, pady=10)
 
 
-#fn1353p    
-def DeleteData():
-    if not tree.selection():
-       result = tkMessageBox.showwarning('', 'Please Select Something First!', icon="warning")
-    else:
-        result = tkMessageBox.askquestion('', 'Are you sure you want to delete this record?', icon="warning")
-        if result == 'yes':
-            curItem = tree.focus()
-            contents =(tree.item(curItem))
-            selecteditem = contents['values']
-            tree.delete(curItem)
-            conn = sqlite3.connect("pythontut.db")
-            cursor = conn.cursor()
-            cursor.execute("DELETE FROM `member` WHERE `mem_id` = %d" % selecteditem[0])
+
+
+        #manage frame
+        Manage_Frame=Frame(self.root,bd=4,relief=RIDGE,bg="mint cream")
+        Manage_Frame.place(x=10,y=100,width=500,height=600)
+        m_title=Label(Manage_Frame,text="Manage contacts",bg="mint cream",fg="black",font=("times new roman",20,"bold"))
+        m_title.grid(row=0,columnspan=2,pady=15)
+
+        
+
+        lbl_name=Label(Manage_Frame,text="Name *",bg="mint cream",fg="black",font=("times new roman",15,"bold"))
+        lbl_name.grid(row=1,column=0,pady=5,padx=30,sticky="w")
+        txt_name=Entry(Manage_Frame,textvariable=self.name_var,font=("times new roman",15,"bold"),bd=3,relief=GROOVE)
+        txt_name.grid(row=1,column=1,pady=5,padx=30,sticky="w")
+
+        
+
+        lbl_email=Label(Manage_Frame,text="Email *",bg="mint cream",fg="black",font=("times new roman",15,"bold"))
+        lbl_email.grid(row=2,column=0,pady=5,padx=30,sticky="w")
+        txt_email=Entry(Manage_Frame,textvariable=self.email_var,font=("times new roman",15,"bold"),bd=5,relief=GROOVE)
+        txt_email.grid(row=2,column=1,pady=5,padx=30,sticky="w")
+
+        lbl_gender=Label(Manage_Frame,text="Gender *",bg="mint cream",fg="black",font=("times new roman",15,"bold"))
+        lbl_gender.grid(row=3,column=0,pady=5,padx=30,sticky="w")
+        combo_gender=ttk.Combobox(Manage_Frame,textvariable=self.gender_var,font=("times new roman",13,"bold"),state="readonly")
+        combo_gender['values']=("Male","Female","Other")
+        combo_gender.grid(row=3,column=1,padx=30,pady=5,sticky="w")
+
+
+        lbl_mobileNo=Label(Manage_Frame,text="Mobile No *",bg="mint cream",fg="black",font=("times new roman",15,"bold"))
+        lbl_mobileNo.grid(row=4,column=0,pady=5,padx=30,sticky="w")
+        txt_mobileNo=Entry(Manage_Frame,textvariable=self.mobileNo_var,font=("times new roman",14,"bold"),bd=5,relief=GROOVE)
+        txt_mobileNo.grid(row=4,column=1,pady=5,padx=30,sticky="w")
+
+        lbl_mobileNo=Label(Manage_Frame,text="Tele No",bg="mint cream",fg="black",font=("times new roman",15,"bold"))
+        lbl_mobileNo.grid(row=5,column=0,pady=5,padx=30,sticky="w")
+        txt_mobileNo=Entry(Manage_Frame,textvariable=self.teleNo_var,font=("times new roman",14,"bold"),bd=5,relief=GROOVE)
+        txt_mobileNo.grid(row=5,column=1,pady=5,padx=30,sticky="w")
+
+        lbl_dob=Label(Manage_Frame,text="D.O.B *",bg="mint cream",fg="black",font=("times new roman",15,"bold"))
+        lbl_dob.grid(row=6,column=0,pady=5,padx=30,sticky="w")
+        txt_dob=Entry(Manage_Frame,textvariable=self.dob_var,font=("times new roman",15,"bold"),bd=5,relief=GROOVE)
+        txt_dob.grid(row=6,column=1,pady=5,padx=30,sticky="w")
+
+        
+       
+
+        lbl_address=Label(Manage_Frame,text="Address *",bg="mint cream",fg="black",font=("times new roman",15,"bold"))
+        lbl_address.grid(row=7,column=0,pady=5,padx=30,sticky="w")
+        self.txt_address=t=Text(Manage_Frame,width=30,height=4,font=("",10))
+        self.txt_address.grid(row=7,column=1,pady=5,padx=30,sticky="w")
+
+        lbl_msg=Label(Manage_Frame,text="* means Required fields",bg="mint cream",fg="black",font=("times new roman",15,"bold"))
+        lbl_msg.grid(row=8,columnspan=2,pady=30)
+
+        Btn_Frame=Frame(Manage_Frame,bd=4,relief=RIDGE,bg="mint cream")
+        Btn_Frame.place(x=10,y=530,width=450)
+        addbtn=Button(Btn_Frame,text="Add",font=("times new roman",12,"bold"),width=10,bg="green",fg="white",command=self.add_contacts).grid(row=0,column=0,padx=5,pady=5)
+        updatebtn=Button(Btn_Frame,text="Update",font=("times new roman",12,"bold"),bg="green",fg="white",width=10,command=self.update_data).grid(row=0,column=1,padx=5,pady=5)
+
+        deletebtn=Button(Btn_Frame,text="Delete",font=("times new roman",12,"bold"),bg="green",fg="white",width=10,command=self.delete_data).grid(row=0,column=2,padx=5,pady=5)
+        clearbtn=Button(Btn_Frame,text="Clear",font=("times new roman",12,"bold"),bg="green",fg="white",width=10,command=self.clear).grid(row=0,column=3,padx=5,pady=5)
+
+
+
+
+         #detail frame
+        Details_Frame=Frame(self.root,bd=4,relief=RIDGE,bg="mint cream")
+        Details_Frame.place(x=525,y=100,width=850,height=600)
+        
+        lbl_search=Label(Details_Frame,text="Search",bg="mint cream",fg="black",font=("times new roman",20,"bold"))
+        lbl_search.grid(row=0,column=0,pady=10,padx=30,sticky="w")
+        combo_search=ttk.Combobox(Details_Frame,width=10,textvariable=self.search_by,font=("times new roman",13,"bold"),state="readonly")
+        combo_search['values']=("Name","MobileNo","Address")
+        combo_search.grid(row=0,column=1,padx=30,pady=10,sticky="w")
+        txt_search=Entry(Details_Frame,textvariable=self.search_txt,width=20,font=("times new roman",10,"bold"),bd=5,relief=GROOVE)
+        txt_search.grid(row=0,column=2,pady=10,padx=30,sticky="w")
+        searchbtn=Button(Details_Frame,text="Search",bg="green",fg="white",font=("times new roman",12,"bold"),command=self.search_data,width=10,pady=5).grid(row=0,column=3,padx=10,pady=10)
+        showallbtn=Button(Details_Frame,text="Showall",bg="green",fg="white",font=("times new roman",12,"bold"),command=self.fetch_data,width=10,pady=5).grid(row=0,column=4,padx=10,pady=10)
+
+        #Table frame
+        Table_Frame=Frame(Details_Frame,bd=4,relief=RIDGE,bg="mint cream")
+        Table_Frame.place(x=10,y=70,width=800,height=500)
+        scroll_x=Scrollbar(Table_Frame,orient=HORIZONTAL)
+        scroll_y=Scrollbar(Table_Frame,orient=VERTICAL)
+        self.contacts_table=ttk.Treeview(Table_Frame,columns=("Name","Email","Gender","Mobile No","Tele No","DOB","Address"),xscrollcommand=scroll_x.set,yscrollcommand=scroll_y.set)
+        scroll_x.pack(side=BOTTOM,fill=X)
+        scroll_y.pack(side=RIGHT,fill=Y)
+        scroll_x.config(command=self.contacts_table.xview)
+        scroll_y.config(command=self.contacts_table.yview)
+        
+        self.contacts_table.heading("Name",text="Name")
+        
+        self.contacts_table.heading("Email",text="Email")
+        self.contacts_table.heading("Gender",text="Gender")
+        self.contacts_table.heading("Mobile No",text="Mobile No")
+        self.contacts_table.heading("Tele No",text="Tele No")
+        
+
+        self.contacts_table.heading("DOB",text="dob")
+        self.contacts_table.heading("Address",text="Address")
+        self.contacts_table['show']="headings"
+        
+        self.contacts_table.column("Name",width=150)
+        
+        self.contacts_table.column("Email",width=150)
+        self.contacts_table.column("Gender",width=100)
+        self.contacts_table.column("Mobile No",width=150)
+        self.contacts_table.column("Tele No",width=150)
+        self.contacts_table.column("DOB",width=150)
+        self.contacts_table.column("Address",width=150)
+        self.contacts_table.pack(fill=BOTH,expand=1)
+        self.contacts_table.bind("<ButtonRelease-1>",self.get_cursor)
+        self.fetch_data()
+    def add_contacts(self):
+        if(self.name_var.get()=="" or self.email_var.get()=="" or self.gender_var.get()=="" or self.mobileNo_var.get()=="" or self.dob_var.get()=="" or self.txt_address.get('1.0',END)=="" ): 
+            messagebox.showerror("Error","Required fields are not filled")
+        else:
+            conn=connect("contacts.db")
+            cur=conn.cursor()
+            cur.execute("insert into contacts values(?,?,?,?,?,?,?)",(self.name_var.get(),self.email_var.get(),self.gender_var.get(),self.mobileNo_var.get(),self.teleNo_var.get(),self.dob_var.get(),self.txt_address.get('1.0',END)))
             conn.commit()
-            cursor.close()
+            self.fetch_data()
+            self.clear()
             conn.close()
-    
-def AddNewWindow():
-    global NewWindow
-    FIRSTNAME.set("")
-    LASTNAME.set("")
-    GENDER.set("")
-    AGE.set("")
-    ADDRESS.set("")
-    CONTACT.set("")
-    NewWindow = Toplevel()
-    NewWindow.title("Contact List")
-    width = 400
-    height = 300
-    screen_width = root.winfo_screenwidth()
-    screen_height = root.winfo_screenheight()
-    x = ((screen_width/2) - 455) - (width/2)
-    y = ((screen_height/2) + 20) - (height/2)
-    NewWindow.resizable(0, 0)
-    NewWindow.geometry("%dx%d+%d+%d" % (width, height, x, y))
-    if 'UpdateWindow' in globals():
-        UpdateWindow.destroy()
-    
-    #===================FRAMES==============================
-    FormTitle = Frame(NewWindow)
-    FormTitle.pack(side=TOP)
-    ContactForm = Frame(NewWindow)
-    ContactForm.pack(side=TOP, pady=10)
-    RadioGroup = Frame(ContactForm)
-    Male = Radiobutton(RadioGroup, text="Male", variable=GENDER, value="Male",  font=('arial', 14)).pack(side=LEFT)
-    Female = Radiobutton(RadioGroup, text="Female", variable=GENDER, value="Female",  font=('arial', 14)).pack(side=LEFT)
-    
-    #===================LABELS==============================
-    lbl_title = Label(FormTitle, text="Adding New Contacts", font=('arial', 16), bg="#66ff66",  width = 300)
-    lbl_title.pack(fill=X)
-    lbl_firstname = Label(ContactForm, text="Firstname", font=('arial', 14), bd=5)
-    lbl_firstname.grid(row=0, sticky=W)
-    lbl_lastname = Label(ContactForm, text="Lastname", font=('arial', 14), bd=5)
-    lbl_lastname.grid(row=1, sticky=W)
-    lbl_gender = Label(ContactForm, text="Gender", font=('arial', 14), bd=5)
-    lbl_gender.grid(row=2, sticky=W)
-    lbl_age = Label(ContactForm, text="Age", font=('arial', 14), bd=5)
-    lbl_age.grid(row=3, sticky=W)
-    lbl_address = Label(ContactForm, text="Address", font=('arial', 14), bd=5)
-    lbl_address.grid(row=4, sticky=W)
-    lbl_contact = Label(ContactForm, text="Contact", font=('arial', 14), bd=5)
-    lbl_contact.grid(row=5, sticky=W)
-
-    #===================ENTRY===============================
-    firstname = Entry(ContactForm, textvariable=FIRSTNAME, font=('arial', 14))
-    firstname.grid(row=0, column=1)
-    lastname = Entry(ContactForm, textvariable=LASTNAME, font=('arial', 14))
-    lastname.grid(row=1, column=1)
-    RadioGroup.grid(row=2, column=1)
-    age = Entry(ContactForm, textvariable=AGE,  font=('arial', 14))
-    age.grid(row=3, column=1)
-    address = Entry(ContactForm, textvariable=ADDRESS,  font=('arial', 14))
-    address.grid(row=4, column=1)
-    contact = Entry(ContactForm, textvariable=CONTACT,  font=('arial', 14))
-    contact.grid(row=5, column=1)
-    
-
-    #==================BUTTONS==============================
-    btn_addcon = Button(ContactForm, text="Save", width=50, command=SubmitData)
-    btn_addcon.grid(row=6, columnspan=2, pady=10)
-
-def Ten():
-    global NewWindow
-    S.set("")
-    NewWindow = Toplevel()
-    NewWindow.title("Contact List")
-    width = 400
-    height = 200
-    screen_width = root.winfo_screenwidth()
-    screen_height = root.winfo_screenheight()
-    x = ((screen_width/2) - 455) - (width/2)
-    y = ((screen_height/2) + 20) - (height/2)
-    NewWindow.resizable(0, 0)
-    NewWindow.geometry("%dx%d+%d+%d" % (width, height, x, y))
-    if 'UpdateWindow' in globals():
-        UpdateWindow.destroy()
-    
-    #===================FRAMES==============================
-    FormTitle = Frame(NewWindow)
-    FormTitle.pack(side=TOP)
-    ContactForm = Frame(NewWindow)
-    ContactForm.pack(side=TOP, pady=10)
-    
-    #===================LABELS==============================
-    lbl_title = Label(FormTitle, text="Adding New Contacts", font=('arial', 16), bg="#66ff66",  width = 300)
-    lbl_title.pack(fill=X)
-    lbl_firstname = Label(ContactForm, text="Loc theo", font=('arial', 14), bd=5)
-    lbl_firstname.grid(row=0, sticky=W)
-    
-    #===================ENTRY===============================
-    firstname = Entry(ContactForm, textvariable=S, font=('arial', 14))
-    firstname.grid(row=0, column=1)
-
-    #==================BUTTONS==============================
-    btn_addcon = Button(ContactForm, text="Loc", width=50, command=LOC)
-    btn_addcon.grid(row=6, columnspan=2, pady=10)
-def LOC():
-    if  S.get() == "":
-        result = tkMessageBox.showwarning('', 'Please Complete The Required Field', icon="warning")
-    else:
-        tree.delete(*tree.get_children())
-        conn = sqlite3.connect("pythontut.db")
-        cursor = conn.cursor()
-        conn.commit()
-        print(S.get())
-        cursor.execute("SELECT * FROM `member` WHERE `lastname`=?",[str(S.get())])
-        fetch = cursor.fetchall()
-        for data in fetch:
-            tree.insert('', 'end', values=(data))
-        cursor.close()
+            messagebox.showinfo("Success","Successfully added")
+    def fetch_data(self):
+        conn=connect("contacts.db")
+        cur=conn.cursor()
+        cur.execute("SELECT * FROM contacts")
+        rows=cur.fetchall()
+        if len(rows)!=0:
+            self.contacts_table.delete(*self.contacts_table.get_children())
+            for row in rows:
+                self.contacts_table.insert('',END,values=row)
+            conn.commit()
         conn.close()
-        S.set("")
-#============================FRAMES======================================
-Top = Frame(root, width=500, bd=1, relief=SOLID)
-Top.pack(side=TOP)
-Mid = Frame(root, width=500,  bg="#6666ff")
-Mid.pack(side=TOP)
-MidLeft = Frame(Mid, width=100)
-MidLeft.pack(side=LEFT, pady=10)
-MidLeftPadding = Frame(Mid, width=370, bg="#6666ff")
-MidLeftPadding.pack(side=LEFT)
-MidRight = Frame(Mid, width=100)
-MidRight.pack(side=RIGHT, pady=10)
-TableMargin = Frame(root, width=500)
-TableMargin.pack(side=TOP)
-#============================LABELS======================================
-lbl_title = Label(Top, text="Contact Management System", font=('arial', 16), width=500)
-lbl_title.pack(fill=X)
+    def clear(self):
+        
+        
+        self.name_var.set("")
+        self.email_var.set("")
+        self.gender_var.set("")
+        self.mobileNo_var.set("")
+        self.teleNo_var.set("")
+        self.dob_var.set("")
+        self.txt_address.delete("1.0",END)
+    def get_cursor(self,ev):
+        cursor_row=self.contacts_table.focus()
+        content=self.contacts_table.item(cursor_row)
+        row=content['values']
+        
+        self.name_var.set(row[0])
+        
+        self.email_var.set(row[1])
+        self.gender_var.set(row[2])
+        self.mobileNo_var.set(row[3])
+        self.teleNo_var.set(row[4])
+        self.dob_var.set(row[5])
+        self.txt_address.delete("1.0",END)
+        self.txt_address.insert(END,row[6])
+    def update_data(self):
+        if(self.name_var.get()=="" or self.email_var.get()=="" or self.gender_var.get()=="" or self.mobileNo_var.get()=="" or self.dob_var.get()=="" or self.txt_address.get('1.0',END)=="" ): 
+            messagebox.showerror("Error","Required fields are not filled")
+        else:
+            conn=connect("contacts.db")
+            cur=conn.cursor()
 
-#============================ENTRY=======================================
+            cur.execute("update contacts set Name=?,Gender=?,MobileNo=?,TeleNo=?,DateOfBirth=?,address=? WHERE Email=?",(self.name_var.get(),self.gender_var.get(),self.mobileNo_var.get(),self.teleNo_var.get(),self.dob_var.get(),self.txt_address.get('1.0',END),self.email_var.get()))
+            conn.commit()
+            self.fetch_data()
+            self.clear()
+            conn.close()
+            messagebox.showinfo("Success","Successfully updated")
+    def delete_data(self):
+        if(self.name_var.get()=="" or self.email_var.get()=="" or self.gender_var.get()=="" or self.mobileNo_var.get()=="" or self.dob_var.get()=="" or self.txt_address.get('1.0',END)=="" ): 
+            messagebox.showerror("Error","Required fields empty")
+        else:
+            conn=connect("contacts.db")
+            cur=conn.cursor()
+            sql_query=f"delete FROM contacts where MobileNo={self.mobileNo_var.get()}"
+            
+            cur.execute(sql_query)
+            
+            conn.commit()
+            conn.close()
+            self.clear()
+            self.fetch_data()
+            messagebox.showinfo("Success","Successfully Deleted")
+    def search_data(self):
+        conn=connect("contacts.db")
+        cur=conn.cursor()
+        sql_query=f"SELECT * FROM contacts where {self.search_by.get()} like '%{self.search_txt.get()}%'"
+        
+        cur.execute(sql_query)
+        rows=cur.fetchall()
+        if len(rows)!=0:
+            self.contacts_table.delete(*self.contacts_table.get_children())
+            for row in rows:
+                self.contacts_table.insert('',END,values=row)
+            conn.commit()
+        else:
+            messagebox.showerror("Error","No Data available")
+            self.search_by.set("")
+            self.search_txt.set("")
+        conn.close()
+    
 
-#============================BUTTONS====================================
-btn_add = Button(MidLeft, text="+ADD NEW", bg="#66ff66", command=AddNewWindow)
-btn_add.pack()
-btn_add = Button(MidLeftPadding, text="     Filter     ", bg="pink", command=Ten)
-btn_add.pack()
-btn_delete = Button(MidRight, text="    DELETE   ", bg="red", command=DeleteData)
-btn_delete.pack()
 
-#============================TABLES======================================
-scrollbarx = Scrollbar(TableMargin, orient=HORIZONTAL)
-scrollbary = Scrollbar(TableMargin, orient=VERTICAL)
-tree = ttk.Treeview(TableMargin, columns=("MemberID", "Firstname", "Lastname", "Gender", "Age", "Address", "Contact"), height=400, selectmode="extended", yscrollcommand=scrollbary.set, xscrollcommand=scrollbarx.set)
-scrollbary.config(command=tree.yview)
-scrollbary.pack(side=RIGHT, fill=Y)
-scrollbarx.config(command=tree.xview)
-scrollbarx.pack(side=BOTTOM, fill=X)
-tree.heading('MemberID', text="MemberID", anchor=W)
-tree.heading('Firstname', text="Firstname", anchor=W)
-tree.heading('Lastname', text="Lastname", anchor=W)
-tree.heading('Gender', text="Gender", anchor=W)
-tree.heading('Age', text="Age", anchor=W)
-tree.heading('Address', text="Address", anchor=W)
-tree.heading('Contact', text="Contact", anchor=W)
-tree.column('#0', stretch=NO, minwidth=0, width=0)
-tree.column('#1', stretch=NO, minwidth=0, width=0)
-tree.column('#2', stretch=NO, minwidth=0, width=80)
-tree.column('#3', stretch=NO, minwidth=0, width=120)
-tree.column('#4', stretch=NO, minwidth=0, width=90)
-tree.column('#5', stretch=NO, minwidth=0, width=80)
-tree.column('#6', stretch=NO, minwidth=0, width=120)
-tree.column('#7', stretch=NO, minwidth=0, width=120)
-tree.pack()
-tree.bind('<Double-Button-1>', OnSelected)
-
-#============================INITIALIZATION==============================
-if __name__ == '__main__':
-    Database()
-    root.mainloop()
+root=Tk()
+con=connect('contacts.db')
+cur=con.cursor()
+cur.execute("CREATE TABLE IF NOT EXISTS contacts(Name text NOT NULL, Email text NOT NULL,Gender text NOT NULL,MobileNo integer(10) NOT NULL,teleNo integer(10) ,DateOfBirth text, Address text NOT NULL); ")
+con.commit()
+con.close()
+ob = Contact(root)
+root.mainloop()
