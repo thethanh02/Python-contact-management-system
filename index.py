@@ -184,7 +184,11 @@ def DeleteData():
             conn.commit()
             cursor.close()
             conn.close()
-    
+
+def Home():
+    tree.delete(*tree.get_children())
+    Database()
+
 def AddNewWindow():
     global NewWindow
     FIRSTNAME.set("")
@@ -332,10 +336,12 @@ lbl_title.pack(fill=X)
 #============================ENTRY=======================================
 
 #============================BUTTONS====================================
-btn_add = Button(MidLeft, text="+ADD NEW", bg="#66ff66", command=AddNewWindow)
+btn_home = Button(MidLeftPadding, text="     Home     ", bg="pink", command=Home)
+btn_home.pack()
+btn_add = Button(MidLeft, text="     +ADD NEW     ", bg="#66ff66", command=AddNewWindow)
 btn_add.pack()
-btn_add = Button(MidLeftPadding, text="     Filter     ", bg="pink", command=FilterWindow)
-btn_add.pack()
+btn_filter = Button(MidLeftPadding, text="     Filter     ", bg="yellow", command=FilterWindow)
+btn_filter.pack()
 btn_delete = Button(MidRight, text="    DELETE   ", bg="red", command=DeleteData)
 btn_delete.pack()
 
