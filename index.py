@@ -3,7 +3,6 @@ import sqlite3
 import tkinter.ttk as ttk
 import tkinter.messagebox as tkMessageBox
 
-#DEVELOPED BY Mark Arvin
 root = Tk()
 root.title("Contact List")
 width = 700
@@ -13,7 +12,7 @@ screen_height = root.winfo_screenheight()
 x = (screen_width/2) - (width/2)
 y = (screen_height/2) - (height/2)
 root.geometry("%dx%d+%d+%d" % (width, height, x, y))
-root.resizable(0, 0)
+root.resizable(1, 1)
 root.config(bg="#6666ff")
 
 #============================VARIABLES===================================
@@ -57,7 +56,7 @@ def SubmitData():
         cursor = conn.cursor()
         cursor.execute("INSERT INTO `member` (firstname, lastname, gender, age, address, contact) VALUES(?, ?, ?, ?, ?, ?)", (str(FIRSTNAME.get()), str(LASTNAME.get()), str(GENDER.get()), int(AGE.get()), str(ADDRESS.get()), str(CONTACT.get())))
         conn.commit()
-        cursor.execute("SELECT Age,* FROM `member` ORDER BY 'age' DESC")
+        cursor.execute("SELECT * FROM `member` ORDER BY `lastname` ASC")
         fetch = cursor.fetchall()
         for data in fetch:
             tree.insert('', 'end', values=(data))
@@ -284,7 +283,7 @@ def FilterWindow():
     Contains.pack()
 
     #===================LABELS==============================
-    lbl_title = Label(FilterTitle, text="Filter Window", font=('arial', 16), bg="#66ff66",  width = 300)
+    lbl_title = Label(FilterTitle, text="Filter Window", font=('arial', 16), bg="yellow",  width = 300)
     lbl_title.pack(fill=X)
     lbl_search_by = Label(SearchByFrame, text="Search by", font=('arial', 12), bd=5)
     lbl_search_by.grid(row=0, sticky=N)
